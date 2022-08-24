@@ -1,0 +1,109 @@
+syntax on
+set number
+set wrap
+set wildmenu
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+set tabstop=5
+set shiftwidth=5
+set softtabstop=5
+set autoindent
+set smartindent
+
+
+let mapleader=" "
+
+noremap ; :
+noremap H 7h
+noremap J 5j
+noremap K 5k
+noremap L l
+
+map <LEADER>sc :set spell!<CR>
+map <LEADER>. :Goyo<CR>
+
+map <LEADER>h <c-w>h
+map <LEADER>j <c-w>j
+map <LEADER>k <c-w>k
+map <LEADER>l <c-w>l
+
+map S :w<CR>
+map Q :q<CR>
+map R :source $MYVIMRC<CR>
+map tt :NERDTreeToggle<CR>
+
+call plug#begin('~/.vim/plugged')
+
+Plug 'vim-airline/vim-airline'
+Plug 'connorholyday/vim-snazzy'
+Plug 'preservim/nerdtree'
+Plug 'dense-analysis/ale'
+Plug 'junegunn/goyo.vim'
+Plug 'preservim/nerdcommenter'
+Plug 'suan/vim-instant-markdown', {'for': 'markdown'}
+Plug 'theniceboy/antovim' " gs to switch
+Plug 'tpope/vim-surround' " type yskw' to wrap the word with '' or type cs'` to change 'word' to `word`
+Plug 'ryanoasis/vim-devicons'
+
+call plug#end()
+
+let g:ycm_clangd_binary_path='/opt/homebrew/opt/llvm/bin/clangd'
+
+noremap r :call CompileRunGcc()<CR>
+func! CompileRunGcc()
+	exec "w"
+	if &filetype == 'c'
+		set splitright
+		:vsp
+		:res -5
+		:! gcc % -o % && ./%
+	elseif &filetype == 'cpp'
+		set splitbelow
+		exec "!g++ -std=c++11 % -Wall -o %<"
+		:sp
+		:res -15
+		:term ./%<
+	elseif &filetype == 'cs'
+		set splitbelow
+		silent! exec "!mcs %"
+		:sp
+		:res -5
+		:term mono %<.exe
+	elseif &filetype == 'java'
+		set splitbelow
+		:sp
+		:res -5
+		term javac % && time java %<
+	elseif &filetype == 'sh'
+		:!time bash %
+	elseif &filetype == 'python'
+		set splitbelow
+		:sp
+		:term python3 %
+	elseif &filetype == 'html'
+		silent! exec "!".g:mkdp_browser." % &"
+	elseif &filetype == 'markdown'
+		exec "InstantMarkdownPreview"
+	elseif &filetype == 'tex'
+		silent! exec "VimtexStop"
+		silent! exec "VimtexCompile"
+	elseif &filetype == 'dart'
+		exec "CocCommand flutter.run -d ".g:flutter_default_device." ".g:flutter_run_args
+		silent! exec "CocCommand flutter.dev.openDevLog"
+	elseif &filetype == 'javascript'
+		set splitbelow
+		:sp
+		:term export DEBUG="INFO,ERROR,WARNING"; node --trace-warnings .
+	elseif &filetype == 'racket'
+		set splitbelow
+		:sp
+		:res -5
+		term racket %
+	elseif &filetype == 'go'
+		set splitbelow
+		:sp
+		:term go run .
+	endif
+endfunc
